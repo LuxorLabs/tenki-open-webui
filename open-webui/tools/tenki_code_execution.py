@@ -6,7 +6,7 @@ funding_url: https://github.com/LuxorLabs/open-webui-tenki
 description: Run Python and shell code in isolated, ephemeral Tenki microVM sandboxes. A secure code interpreter / code execution sandbox for Open WebUI (isolated, ephemeral, microVM).
 version: 0.1.0
 license: MIT
-requirements: tenki-sandbox[async]
+requirements: tenki-sandbox[async]>=0.3.5
 """
 
 # ---------------------------------------------------------------------------
