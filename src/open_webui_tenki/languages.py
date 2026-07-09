@@ -37,7 +37,7 @@ try:
         _expr = ast.fix_missing_locations(ast.Expression(_last.value))
         _val = eval(compile(_expr, {codefile!r}, "eval"), _ns)
         if _val is not None:
-            _result = repr(_val)
+            _result = repr(_val)[:{maxbytes}]
     else:
         exec(compile(_tree, {codefile!r}, "exec"), _ns)
     if _result is not None:
@@ -72,12 +72,15 @@ def normalize_language(language: str | None, default: str = "python") -> str:
     return lang
 
 
-def build_run_plan(language: str, code: str) -> RunPlan:
+def build_run_plan(language: str, code: str, max_output_bytes: int = 100_000) -> RunPlan:
     """Build the run plan for a supported language, else raise ``ValueError``."""
     lang = normalize_language(language)
     if lang == "python":
         runner = _PY_RUNNER.format(
-            outdir=OUTPUT_DIR, codefile=CODE_FILENAME, resultfile=RESULT_FILENAME
+            outdir=OUTPUT_DIR,
+            codefile=CODE_FILENAME,
+            resultfile=RESULT_FILENAME,
+            maxbytes=max_output_bytes,
         )
         return RunPlan(
             argv=("python3", RUNNER_FILENAME),

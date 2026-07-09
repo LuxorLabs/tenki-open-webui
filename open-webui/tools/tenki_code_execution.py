@@ -141,6 +141,17 @@ def resolve_effective_key(valves: Valves, __user__: dict | None = None) -> str:
     return _user_key(__user__) or (valves.tenki_api_key or "").strip()
 
 
+def _fenced(text: str) -> str:
+    """Wrap untrusted text in a code fence longer than any backtick run inside it,
+    so the text cannot break out of the block and render as live markdown."""
+    longest = run = 0
+    for ch in text:
+        run = run + 1 if ch == "`" else 0
+        longest = max(longest, run)
+    fence = "`" * max(3, longest + 1)
+    return f"{fence}\n{text}\n{fence}"
+
+
 class ExecutionResult(BaseModel):
     """Outcome of a single code execution. Rendered for the Tool and the Action."""
 
@@ -187,12 +198,14 @@ class ExecutionResult(BaseModel):
     def to_chat_markdown(self) -> str:
         """Rich text rendering for the Action (images go via a `files` event)."""
         if self.error:
-            return f"**Error:** {self.error}"
+            return f"**Error**\n\n{_fenced(self.error)}"
 
         # Text only. Images are delivered via a separate `files` event (see the
         # Action/Tool) because Open WebUI renders message `files` regardless of the
         # content-vs-output precedence that hides plain `content` for Responses-API
         # messages; a `![](data:...)` in content would silently not render there.
+        # Untrusted output goes through _fenced() so backticks in it can't break
+        # out of the code block and render as live markdown.
         parts: list[str] = []
         if self.timed_out:
             parts.append(f"⏱️ **Timed out** after {self._duration_text()}.")
@@ -204,11 +217,11 @@ class ExecutionResult(BaseModel):
             parts.append(f"_{len(self.images)} image(s) shown below._")
 
         if self.result:
-            parts.append(f"**result**\n```\n{self.result}\n```")
+            parts.append(f"**result**\n{_fenced(self.result)}")
         if self.stdout:
-            parts.append(f"**stdout**\n```\n{self.stdout}\n```")
+            parts.append(f"**stdout**\n{_fenced(self.stdout)}")
         if self.stderr:
-            parts.append(f"**stderr**\n```\n{self.stderr}\n```")
+            parts.append(f"**stderr**\n{_fenced(self.stderr)}")
         if self.truncated:
             parts.append("_Output was truncated._")
         if not (self.images or self.stdout or self.stderr or self.result):
@@ -241,7 +254,7 @@ try:
         _expr = ast.fix_missing_locations(ast.Expression(_last.value))
         _val = eval(compile(_expr, {codefile!r}, "eval"), _ns)
         if _val is not None:
-            _result = repr(_val)
+            _result = repr(_val)[:{maxbytes}]
     else:
         exec(compile(_tree, {codefile!r}, "exec"), _ns)
     if _result is not None:
@@ -276,12 +289,15 @@ def normalize_language(language: str | None, default: str = "python") -> str:
     return lang
 
 
-def build_run_plan(language: str, code: str) -> RunPlan:
+def build_run_plan(language: str, code: str, max_output_bytes: int = 100_000) -> RunPlan:
     """Build the run plan for a supported language, else raise ``ValueError``."""
     lang = normalize_language(language)
     if lang == "python":
         runner = _PY_RUNNER.format(
-            outdir=OUTPUT_DIR, codefile=CODE_FILENAME, resultfile=RESULT_FILENAME
+            outdir=OUTPUT_DIR,
+            codefile=CODE_FILENAME,
+            resultfile=RESULT_FILENAME,
+            maxbytes=max_output_bytes,
         )
         return RunPlan(
             argv=("python3", RUNNER_FILENAME),
@@ -340,6 +356,11 @@ async def _collect_images(sandbox: AsyncSandbox) -> list[str]:
         mime = IMAGE_MIME_TYPES.get(splitext(entry.path)[1].lower())
         if mime is None:
             continue
+        # Skip oversized files by their listed size *before* reading them into host
+        # memory, so a single huge file can't cause memory pressure.
+        size = getattr(entry, "size", 0) or 0
+        if size > MAX_IMAGE_BYTES or total + size > MAX_IMAGE_BYTES:
+            continue
         try:
             raw = await sandbox.fs.read_bytes(f"{OUTPUT_DIR}/{entry.path}")
         except Exception:
@@ -354,7 +375,7 @@ async def _collect_images(sandbox: AsyncSandbox) -> list[str]:
 
 async def _run_in_sandbox(sandbox: AsyncSandbox, request: CodeExecutionRequest):
     """Write the code, ensure the output dir, and exec. Returns the CommandResult."""
-    plan = build_run_plan(request.language, request.code)
+    plan = build_run_plan(request.language, request.code, request.valves.max_output_bytes)
     # Create the output dir via exec (runs as the sandbox user) rather than the fs
     # RPC (runs as the guest agent / root), so the code can write images into it.
     await sandbox.exec("mkdir", "-p", OUTPUT_DIR)
@@ -428,7 +449,10 @@ async def _provision_and_run(request: CodeExecutionRequest) -> ExecutionResult:
             except Exception:
                 images = []
             try:  # REPL-style last-expression echo (Python runner writes this)
-                result_text = (await sandbox.fs.read_text(RESULT_FILENAME)).strip()
+                raw_result = await sandbox.fs.read_text(RESULT_FILENAME)
+                # Cap like stdout/stderr so this channel can't bypass max_output_bytes.
+                result_text, _ = _decode_capped(raw_result.encode("utf-8"), valves.max_output_bytes)
+                result_text = result_text.strip()
             except Exception:
                 result_text = ""
     finally:

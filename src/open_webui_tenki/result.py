@@ -5,6 +5,17 @@ from __future__ import annotations
 from pydantic import BaseModel, Field
 
 
+def _fenced(text: str) -> str:
+    """Wrap untrusted text in a code fence longer than any backtick run inside it,
+    so the text cannot break out of the block and render as live markdown."""
+    longest = run = 0
+    for ch in text:
+        run = run + 1 if ch == "`" else 0
+        longest = max(longest, run)
+    fence = "`" * max(3, longest + 1)
+    return f"{fence}\n{text}\n{fence}"
+
+
 class ExecutionResult(BaseModel):
     """Outcome of a single code execution. Rendered for the Tool and the Action."""
 
@@ -51,12 +62,14 @@ class ExecutionResult(BaseModel):
     def to_chat_markdown(self) -> str:
         """Rich text rendering for the Action (images go via a `files` event)."""
         if self.error:
-            return f"**Error:** {self.error}"
+            return f"**Error**\n\n{_fenced(self.error)}"
 
         # Text only. Images are delivered via a separate `files` event (see the
         # Action/Tool) because Open WebUI renders message `files` regardless of the
         # content-vs-output precedence that hides plain `content` for Responses-API
         # messages; a `![](data:...)` in content would silently not render there.
+        # Untrusted output goes through _fenced() so backticks in it can't break
+        # out of the code block and render as live markdown.
         parts: list[str] = []
         if self.timed_out:
             parts.append(f"⏱️ **Timed out** after {self._duration_text()}.")
@@ -68,11 +81,11 @@ class ExecutionResult(BaseModel):
             parts.append(f"_{len(self.images)} image(s) shown below._")
 
         if self.result:
-            parts.append(f"**result**\n```\n{self.result}\n```")
+            parts.append(f"**result**\n{_fenced(self.result)}")
         if self.stdout:
-            parts.append(f"**stdout**\n```\n{self.stdout}\n```")
+            parts.append(f"**stdout**\n{_fenced(self.stdout)}")
         if self.stderr:
-            parts.append(f"**stderr**\n```\n{self.stderr}\n```")
+            parts.append(f"**stderr**\n{_fenced(self.stderr)}")
         if self.truncated:
             parts.append("_Output was truncated._")
         if not (self.images or self.stdout or self.stderr or self.result):

@@ -32,9 +32,10 @@ python scripts/try_live.py            # ad-hoc single run; images saved to ./liv
 
 ## Cutting a release
 
-1. Bump the version in **three** places (they must match — `scripts/check_version.py`
-   enforces it): `pyproject.toml`, and the `version:` frontmatter in both
-   `src`-inlined distributables (the frontmatter lives in `scripts/build.py`).
+1. Bump the version in these places (they must match — `scripts/check_version.py`
+   enforces it): `pyproject.toml`, `src/open_webui_tenki/__init__.py`
+   (`__version__`), and the `version:` frontmatter for both distributables (which
+   lives in `scripts/build.py`).
 2. `python scripts/build.py` and commit the regenerated files.
 3. `python scripts/check_version.py vX.Y.Z` to confirm consistency.
 4. Create a GitHub Release tagged `vX.Y.Z`. The `release` workflow verifies the

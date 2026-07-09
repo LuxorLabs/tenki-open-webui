@@ -58,7 +58,7 @@ class FakeFS:
 
     async def list(self, path, **kw):
         if path == OUTPUT_DIR:
-            return [FakeEntry(name) for name in self.images]
+            return [FakeEntry(name, size=len(data)) for name, data in self.images.items()]
         raise FileNotFoundError(path)
 
     async def read_bytes(self, path):

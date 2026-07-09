@@ -125,6 +125,22 @@ async def test_no_result_when_absent(patch_sdk):
     assert result.result == ""
 
 
+async def test_result_is_capped(patch_sdk):
+    # The result channel must respect max_output_bytes (not an uncapped exfil path).
+    patch_sdk(result_text="A" * 50_000)
+    result = await execute(_req(max_output_bytes=1000))
+    assert len(result.result.encode("utf-8")) <= 1000
+
+
+async def test_oversized_image_skipped(patch_sdk, monkeypatch):
+    # A file larger than the cap must be skipped by its listed size, not read.
+    monkeypatch.setattr("open_webui_tenki.core.MAX_IMAGE_BYTES", 10)
+    patch_sdk(images={"big.png": b"x" * 50, "ok.png": b"\x89PNG"})
+    result = await execute(_req())
+    assert len(result.images) == 1  # only the small one
+    assert result.images[0].startswith("data:image/png;base64,")
+
+
 async def test_python_writes_code_and_runner(patch_sdk):
     sdk = patch_sdk()
     await execute(_req(code="print('x')", language="python"))

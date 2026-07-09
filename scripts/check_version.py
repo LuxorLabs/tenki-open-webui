@@ -37,10 +37,21 @@ def _frontmatter_version(path: Path) -> str:
     return match.group(1).strip()
 
 
+def _dunder_version() -> str:
+    path = ROOT / "src" / "open_webui_tenki" / "__init__.py"
+    match = re.search(r'__version__\s*=\s*"([^"]+)"', path.read_text())
+    if not match:
+        sys.exit("could not find __version__ in src/open_webui_tenki/__init__.py")
+    return match.group(1)
+
+
 def main() -> None:
     expected_tag = sys.argv[1].lstrip("v") if len(sys.argv) > 1 else None
 
-    versions = {"pyproject.toml": _pyproject_version()}
+    versions = {
+        "pyproject.toml": _pyproject_version(),
+        "src/open_webui_tenki/__init__.py": _dunder_version(),
+    }
     for path in DISTRIBUTABLES:
         versions[str(path.relative_to(ROOT))] = _frontmatter_version(path)
 

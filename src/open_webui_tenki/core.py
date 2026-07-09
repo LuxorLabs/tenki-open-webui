@@ -74,6 +74,11 @@ async def _collect_images(sandbox: AsyncSandbox) -> list[str]:
         mime = IMAGE_MIME_TYPES.get(splitext(entry.path)[1].lower())
         if mime is None:
             continue
+        # Skip oversized files by their listed size *before* reading them into host
+        # memory, so a single huge file can't cause memory pressure.
+        size = getattr(entry, "size", 0) or 0
+        if size > MAX_IMAGE_BYTES or total + size > MAX_IMAGE_BYTES:
+            continue
         try:
             raw = await sandbox.fs.read_bytes(f"{OUTPUT_DIR}/{entry.path}")
         except Exception:
@@ -88,7 +93,7 @@ async def _collect_images(sandbox: AsyncSandbox) -> list[str]:
 
 async def _run_in_sandbox(sandbox: AsyncSandbox, request: CodeExecutionRequest):
     """Write the code, ensure the output dir, and exec. Returns the CommandResult."""
-    plan = build_run_plan(request.language, request.code)
+    plan = build_run_plan(request.language, request.code, request.valves.max_output_bytes)
     # Create the output dir via exec (runs as the sandbox user) rather than the fs
     # RPC (runs as the guest agent / root), so the code can write images into it.
     await sandbox.exec("mkdir", "-p", OUTPUT_DIR)
@@ -162,7 +167,10 @@ async def _provision_and_run(request: CodeExecutionRequest) -> ExecutionResult:
             except Exception:
                 images = []
             try:  # REPL-style last-expression echo (Python runner writes this)
-                result_text = (await sandbox.fs.read_text(RESULT_FILENAME)).strip()
+                raw_result = await sandbox.fs.read_text(RESULT_FILENAME)
+                # Cap like stdout/stderr so this channel can't bypass max_output_bytes.
+                result_text, _ = _decode_capped(raw_result.encode("utf-8"), valves.max_output_bytes)
+                result_text = result_text.strip()
             except Exception:
                 result_text = ""
     finally:
