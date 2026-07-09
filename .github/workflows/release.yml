@@ -1,0 +1,45 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Release tag to validate against (e.g. v0.1.0)"
+        required: true
+
+# No PyPI publish: these plugins are distributed as single files via the Open
+# WebUI community hub and as GitHub Release assets, not as a pip package.
+jobs:
+  release-assets:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+
+      - name: Build distributables
+        run: python scripts/build.py
+
+      - name: Assert committed distributables are in sync
+        run: git diff --exit-code open-webui/
+
+      - name: Assert version matches the release tag
+        run: |
+          TAG="${{ github.event.release.tag_name || github.event.inputs.tag }}"
+          python scripts/check_version.py "$TAG"
+
+      - name: Upload distributables as release assets
+        if: github.event_name == 'release'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload "${{ github.event.release.tag_name }}" \
+            open-webui/tools/tenki_code_execution.py \
+            open-webui/functions/tenki_run_code.py \
+            --clobber
