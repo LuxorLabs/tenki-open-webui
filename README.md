@@ -47,6 +47,9 @@ between runs**, is **non-blocking** (async), enforces a **timeout**, and is
      or paste the contents of `open-webui/functions/tenki_run_code.py`.
    - Open WebUI installs the declared `tenki-sandbox[async]` dependency
      automatically on import — no manual `pip install`, no server restart.
+     _(Multi-replica deployments may prefer to bake the dependency into their
+     image and set `ENABLE_PIP_INSTALL_FRONTMATTER_REQUIREMENTS=False` to avoid
+     per-worker install races.)_
 3. **Configure** (open the plugin's ⚙️ settings / Valves): paste your
    `tenki_api_key`. Optionally adjust resources, `timeout_seconds`, and
    `network_egress`.

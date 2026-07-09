@@ -41,19 +41,45 @@ python scripts/try_live.py            # ad-hoc single run; images saved to ./liv
    tag matches the declared version and attaches both distributables as release
    assets. (No PyPI publish — distribution is single-file via the hub.)
 
-## Publishing to the Open WebUI community hub
+## Publishing to the Open WebUI Community site
 
-Both plugins are published to [openwebui.com](https://openwebui.com/) so operators
-can one-click import them.
+Both plugins are published to the [Open WebUI Community site](https://openwebui.com/)
+so operators can discover them by keyword and import them in one click (imported
+Tools land under **Workspace → Tools**, Functions under **Admin Panel → Functions**).
 
-1. Sign in at [openwebui.com](https://openwebui.com/).
-2. **Tool** → create a new Tool, paste the contents of
-   `open-webui/tools/tenki_code_execution.py`. Keep the keyword-rich
-   title/description (they drive hub search for "code execution", "code
-   interpreter", "sandbox", "python", "isolated", "microVM").
-3. **Function** → create a new Action Function, paste the contents of
+**Publish both, from the built single-file distributables** (not `src/`):
+
+1. Build and sanity-check first: `python scripts/build.py`, `pytest tests/unit`,
+   `ruff check src scripts tests`.
+2. Sign in at [openwebui.com](https://openwebui.com/).
+3. **Tool** — create a new Tool and paste the full contents of
+   `open-webui/tools/tenki_code_execution.py`.
+4. **Function** — create a new Function (Action) and paste the full contents of
    `open-webui/functions/tenki_run_code.py`.
-4. Link back to this repository from both listings.
+5. Link both listings back to this repository, and keep the version in the
+   listing in sync with the file's frontmatter `version:`.
+
+### Discovery
+
+Listings are found via keyword [search](https://openwebui.com/search). The
+frontmatter `title` + `description` are the searchable text, so keep them
+keyword-rich — both descriptions cover **code execution, code interpreter,
+sandbox, python, shell, isolated, microVM**. Don't shorten the descriptions when
+publishing.
+
+### What to know before publishing
+
+- **Listings are unaudited.** Being listed/featured on the community site is not
+  an endorsement — reviewers are expected to read the source before importing. So
+  keep the distributables readable and the `README` clear; that is what earns
+  trust. (Ours: secrets only in Valves, never logged; fully `async` handlers;
+  documented security posture — all in line with Open WebUI's sharing guidance.)
+- **`requirements:` installs at load time.** Open WebUI pip-installs
+  `tenki-sandbox[async]` on import. This requires that version to be published on
+  PyPI. Note for operators: in multi-replica deployments, runtime installs can
+  race across workers — they can set
+  `ENABLE_PIP_INSTALL_FRONTMATTER_REQUIREMENTS=False` and bake the dependency into
+  their image instead. (Worth a line in the README's install notes.)
 
 ### Optional: docs PR
 
