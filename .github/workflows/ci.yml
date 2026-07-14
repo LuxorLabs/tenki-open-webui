@@ -1,0 +1,64 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install ruff
+      - run: ruff check src scripts tests
+      - run: ruff format --check src scripts tests
+
+  unit-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+      - run: pip install -e ".[dev]"
+      - run: pytest tests/unit -q
+
+  build-sync:
+    # Fails if the committed single-file distributables drifted from src/.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - run: python scripts/build.py
+      - name: Verify distributables are in sync with src/
+        run: git diff --exit-code open-webui/
+
+  integration-tests:
+    # Live tests against real Tenki microVMs. Only run when the secret is present
+    # (first-party pushes / manual dispatch); a no-op otherwise.
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e ".[dev]"
+      - name: Run live integration tests (skips if no key)
+        env:
+          TENKI_API_KEY: ${{ secrets.TENKI_API_KEY }}
+          TENKI_API_ENDPOINT: ${{ secrets.TENKI_API_ENDPOINT }}
+          TENKI_PROJECT_ID: ${{ secrets.TENKI_PROJECT_ID }}
+        run: pytest tests/integration -q
