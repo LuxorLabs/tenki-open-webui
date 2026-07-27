@@ -40,7 +40,7 @@ def test_no_local_package_imports(path, _class, _attr):
 def test_has_frontmatter(path, _class, _attr):
     src = path.read_text()
     assert src.lstrip().startswith('"""')
-    assert "requirements: tenki-sandbox[async]" in src
+    assert "requirements: tenki[async]" in src
     assert "title:" in src and "author: LuxorLabs" in src
 
 

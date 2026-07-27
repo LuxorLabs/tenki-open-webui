@@ -7,7 +7,6 @@ without needing Open WebUI. Any collected images are written to ``./live_out/``.
 Usage:
     export TENKI_API_KEY=sk-...
     # optional: export TENKI_API_ENDPOINT=https://api.tenki.cloud
-    # optional: export TENKI_PROJECT_ID=proj_...
 
     python scripts/try_live.py                          # default demo snippet
     python scripts/try_live.py -l shell -c 'uname -a'
@@ -61,7 +60,6 @@ async def main() -> int:
     valves = Valves(
         tenki_api_key=key,
         tenki_api_endpoint=os.getenv("TENKI_API_ENDPOINT", "https://api.tenki.cloud"),
-        tenki_project_id=os.getenv("TENKI_PROJECT_ID", ""),
         timeout_seconds=args.timeout,
         network_egress=args.egress,
     )

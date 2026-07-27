@@ -45,7 +45,7 @@ between runs**, is **non-blocking** (async), enforces a **timeout**, and is
      `open-webui/tools/tenki_code_execution.py`.
    - **Action** (optional) — Admin Panel → Functions → import _Tenki Run Code_,
      or paste the contents of `open-webui/functions/tenki_run_code.py`.
-   - Open WebUI installs the declared `tenki-sandbox[async]` dependency
+   - Open WebUI installs the declared `tenki[async]` dependency
      automatically on import — no manual `pip install`, no server restart.
      _(Multi-replica deployments may prefer to bake the dependency into their
      image and set `ENABLE_PIP_INSTALL_FRONTMATTER_REQUIREMENTS=False` to avoid
@@ -74,7 +74,6 @@ between runs**, is **non-blocking** (async), enforces a **timeout**, and is
 | `tenki_api_key` | _(empty)_ | **Required** (unless every user sets their own). Instance-wide Tenki key. |
 | `tenki_api_endpoint` | `https://api.tenki.cloud` | Override for self-hosted / staging. |
 | `tenki_workspace_id` | _(empty)_ | Optional workspace scope; uses the account default when empty. |
-| `tenki_project_id` | _(empty)_ | Optional project scope; uses the account default when empty. |
 | `default_language` | `python` | `python` or `shell`, used when the caller doesn't specify. |
 | `cpu_cores` / `memory_mb` / `disk_size_gb` | `1` / `512` / `5` | Sandbox resource size (disk 5–100 GiB). |
 | `timeout_seconds` | `300` | Max execution time per run (1–600). |
@@ -101,7 +100,7 @@ crashes or silently does nothing.
 Everything your code runs against — the Python version, the shell, and the
 available libraries — comes from the **Tenki sandbox image**, not from this
 plugin. The `requirements:` frontmatter only installs the plugin's own dependency
-(`tenki-sandbox[async]`) on the Open WebUI host; it does **not** add packages to
+(`tenki[async]`) on the Open WebUI host; it does **not** add packages to
 the sandbox.
 
 The default image ships a common set of libraries. To use a different set, point

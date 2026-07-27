@@ -25,7 +25,6 @@ if they drift (`git diff --exit-code open-webui/`).
 ```bash
 export TENKI_API_KEY=sk-...
 # optional: export TENKI_API_ENDPOINT=https://api.tenki.cloud
-# optional: export TENKI_PROJECT_ID=proj_...
 pytest tests/integration              # provisions real microVMs; costs quota
 python scripts/try_live.py            # ad-hoc single run; images saved to ./live_out/
 ```
@@ -76,7 +75,7 @@ publishing.
   trust. (Ours: secrets only in Valves, never logged; fully `async` handlers;
   documented security posture — all in line with Open WebUI's sharing guidance.)
 - **`requirements:` installs at load time.** Open WebUI pip-installs
-  `tenki-sandbox[async]` on import. This requires that version to be published on
+  `tenki[async]` on import. This requires that version to be published on
   PyPI. Note for operators: in multi-replica deployments, runtime installs can
   race across workers — they can set
   `ENABLE_PIP_INSTALL_FRONTMATTER_REQUIREMENTS=False` and bake the dependency into
