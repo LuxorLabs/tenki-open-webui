@@ -82,6 +82,11 @@ between runs**, is **non-blocking** (async), enforces a **timeout**, and is
 | `max_concurrent_executions` | `5` | Cap on simultaneous sandboxes per instance. |
 | `max_output_bytes` | `100000` | Truncation cap for captured output. |
 
+> **Upgrade note — `tenki_project_id` was removed.** Tenki dropped project
+> scoping from the API, so the SDK no longer accepts a project ID at all. If you
+> had set this valve, no action is needed: the stored value is ignored and
+> nothing breaks. Use `tenki_workspace_id` to scope sandboxes instead.
+
 ### Per-user keys (UserValves)
 
 Each user may set their **own** Tenki key under their personal plugin settings.
