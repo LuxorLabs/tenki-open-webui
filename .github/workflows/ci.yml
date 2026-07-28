@@ -60,5 +60,4 @@ jobs:
         env:
           TENKI_API_KEY: ${{ secrets.TENKI_API_KEY }}
           TENKI_API_ENDPOINT: ${{ secrets.TENKI_API_ENDPOINT }}
-          TENKI_PROJECT_ID: ${{ secrets.TENKI_PROJECT_ID }}
         run: pytest tests/integration -q

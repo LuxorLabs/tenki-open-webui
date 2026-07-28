@@ -10,7 +10,7 @@ from open_webui_tenki.constants import OUTPUT_DIR
 
 
 class FakeEntry:
-    """Mimics tenki_sandbox FileInfo for fs.list()."""
+    """Mimics tenki FileInfo for fs.list()."""
 
     def __init__(self, name: str, is_dir: bool = False, size: int = 0):
         self.path = name
@@ -19,7 +19,7 @@ class FakeEntry:
 
 
 class FakeCommandResult:
-    """Mimics tenki_sandbox CommandResult (stdout/stderr are bytes)."""
+    """Mimics tenki CommandResult (stdout/stderr are bytes)."""
 
     def __init__(
         self,
@@ -99,7 +99,7 @@ class FakeSandbox:
 
 
 class FakeSDK:
-    """Stand-in for tenki_sandbox.AsyncSandbox; patched into core."""
+    """Stand-in for tenki.AsyncSandbox; patched into core."""
 
     def __init__(
         self,

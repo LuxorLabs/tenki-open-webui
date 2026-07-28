@@ -20,7 +20,7 @@ keywords = [
     "tenki",
 ]
 dependencies = [
-    "tenki-sandbox[async]>=0.3.5",
+    "tenki[async]>=0.5.1",
     "pydantic>=2",
 ]
 

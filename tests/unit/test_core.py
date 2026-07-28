@@ -34,7 +34,7 @@ async def test_only_configured_endpoint_no_other_host(patch_sdk):
     assert kwargs["auth_token"] == "k"
     # No stray host/url params leak into the create call.
     for key, value in kwargs.items():
-        if key in ("auth_token", "project_id", "image"):
+        if key in ("auth_token", "image"):
             continue
         if isinstance(value, str):
             assert "http" not in value or value == kwargs["base_url"]

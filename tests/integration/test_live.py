@@ -7,7 +7,6 @@ microVMs (they cost quota and take seconds each).
 Env:
 - ``TENKI_API_KEY``       (required to run)
 - ``TENKI_API_ENDPOINT``  (optional; defaults to https://api.tenki.cloud)
-- ``TENKI_PROJECT_ID``    (optional)
 """
 
 from __future__ import annotations
@@ -34,7 +33,6 @@ def _valves(**overrides) -> Valves:
     return Valves(
         tenki_api_key=API_KEY,
         tenki_api_endpoint=os.getenv("TENKI_API_ENDPOINT", "https://api.tenki.cloud"),
-        tenki_project_id=os.getenv("TENKI_PROJECT_ID", ""),
         **overrides,
     )
 
@@ -47,13 +45,12 @@ def _req(code: str, language: str = "python", **overrides) -> CodeExecutionReque
 
 async def _raw_sandbox():
     """Provision a raw AsyncSandbox with the same knobs the core uses."""
-    from tenki_sandbox import AsyncSandbox
+    from tenki import AsyncSandbox
 
     v = _valves()
     return await AsyncSandbox.create(
         auth_token=API_KEY,
         base_url=v.tenki_api_endpoint,
-        project_id=v.tenki_project_id or None,
         cpu_cores=v.cpu_cores,
         memory_mb=v.memory_mb,
         disk_size_gb=v.disk_size_gb,
@@ -170,7 +167,7 @@ async def test_fs_mkdir_recursive_is_writable_by_exec_user():
 
 async def test_no_sandbox_leak():
     # Snapshot RUNNING sessions before/after; the run's sandbox must be torn down.
-    from tenki_sandbox import AsyncClient
+    from tenki import AsyncClient
 
     endpoint = os.getenv("TENKI_API_ENDPOINT", "https://api.tenki.cloud")
 

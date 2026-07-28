@@ -34,7 +34,6 @@ green without secrets.
 export TENKI_API_KEY=sk-...
 # optional, for a self-hosted or non-default deployment:
 # export TENKI_API_ENDPOINT=https://api.tenki.cloud
-# export TENKI_PROJECT_ID=proj_...
 
 pytest tests/integration -v          # full gated suite
 python scripts/try_live.py           # ad-hoc single run; images saved to ./live_out/
@@ -84,7 +83,7 @@ docker run -d -p 3000:8080 \
 
 Open <http://localhost:3000> and create the first (admin) account.
 
-> Open WebUI installs the plugin's declared `tenki-sandbox[async]` dependency
+> Open WebUI installs the plugin's declared `tenki[async]` dependency
 > automatically on import (from the `requirements:` frontmatter) — no manual
 > install, no restart.
 

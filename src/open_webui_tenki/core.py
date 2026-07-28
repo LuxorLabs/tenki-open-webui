@@ -13,7 +13,7 @@ import time
 from dataclasses import dataclass
 from os.path import splitext
 
-from tenki_sandbox import AsyncSandbox
+from tenki import AsyncSandbox
 
 from .config import Valves
 from .constants import (
@@ -131,7 +131,6 @@ async def _provision_and_run(request: CodeExecutionRequest) -> ExecutionResult:
             auth_token=request.api_key,
             base_url=valves.tenki_api_endpoint,  # data goes only to the configured endpoint
             workspace_id=valves.tenki_workspace_id or None,
-            project_id=valves.tenki_project_id or None,
             cpu_cores=valves.cpu_cores,
             memory_mb=valves.memory_mb,
             disk_size_gb=valves.disk_size_gb,

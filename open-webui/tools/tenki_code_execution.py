@@ -6,7 +6,7 @@ funding_url: https://github.com/LuxorLabs/open-webui-tenki
 description: Run Python and shell code in isolated, ephemeral Tenki microVM sandboxes. A secure code interpreter / code execution sandbox for Open WebUI (isolated, ephemeral, microVM).
 version: 0.1.0
 license: MIT
-requirements: tenki-sandbox[async]>=0.3.5
+requirements: tenki[async]>=0.5.1
 """
 
 # ---------------------------------------------------------------------------
@@ -19,7 +19,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from os.path import splitext
 from pydantic import BaseModel, Field, field_validator
-from tenki_sandbox import AsyncSandbox
+from tenki import AsyncSandbox
 from typing import Literal
 import asyncio
 import base64
@@ -69,10 +69,6 @@ class Valves(BaseModel):
     tenki_workspace_id: str = Field(
         default="",
         description="Optional Tenki workspace ID. Uses the account default when empty.",
-    )
-    tenki_project_id: str = Field(
-        default="",
-        description="Optional Tenki project ID. Uses the account default when empty.",
     )
     default_language: Literal["python", "shell"] = Field(
         default="python",
@@ -413,7 +409,6 @@ async def _provision_and_run(request: CodeExecutionRequest) -> ExecutionResult:
             auth_token=request.api_key,
             base_url=valves.tenki_api_endpoint,  # data goes only to the configured endpoint
             workspace_id=valves.tenki_workspace_id or None,
-            project_id=valves.tenki_project_id or None,
             cpu_cores=valves.cpu_cores,
             memory_mb=valves.memory_mb,
             disk_size_gb=valves.disk_size_gb,

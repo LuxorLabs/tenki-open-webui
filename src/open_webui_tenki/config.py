@@ -26,10 +26,6 @@ class Valves(BaseModel):
         default="",
         description="Optional Tenki workspace ID. Uses the account default when empty.",
     )
-    tenki_project_id: str = Field(
-        default="",
-        description="Optional Tenki project ID. Uses the account default when empty.",
-    )
     default_language: Literal["python", "shell"] = Field(
         default="python",
         description="Language used when the caller does not specify one.",
