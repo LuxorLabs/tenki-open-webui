@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from open_webui_tenki.result import ExecutionResult
+from tenki_open_webui.result import ExecutionResult
 
 
 def test_chat_markdown_fences_backticks_safely():

@@ -26,8 +26,8 @@ from pathlib import Path
 # Allow running from a checkout without installing the package.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
-from open_webui_tenki.config import Valves  # noqa: E402
-from open_webui_tenki.core import CodeExecutionRequest, execute  # noqa: E402
+from tenki_open_webui.config import Valves  # noqa: E402
+from tenki_open_webui.core import CodeExecutionRequest, execute  # noqa: E402
 
 _DEFAULT_CODE = """\
 import sys

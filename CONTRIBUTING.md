@@ -2,7 +2,7 @@
 
 ## Development
 
-The logic is written once under `src/open_webui_tenki/` and inlined into the two
+The logic is written once under `src/tenki_open_webui/` and inlined into the two
 single-file distributables under `open-webui/` by `scripts/build.py`. **Never edit
 the files under `open-webui/` by hand** — they are generated.
 
@@ -14,6 +14,9 @@ ruff check src scripts tests          # lint
 ruff format src scripts tests         # format
 pytest tests/unit                     # unit tests (mocked SDK, no credentials)
 python scripts/build.py               # regenerate the distributables
+python scripts/check_changelog.py     # declared version has a CHANGELOG entry
+python scripts/changelog_notes.py     # preview the release notes for that version
+pipx run pip-audit .                  # known-vulnerability scan (as CI runs it)
 ```
 
 After changing anything in `src/`, run `python scripts/build.py` and commit the
@@ -32,14 +35,28 @@ python scripts/try_live.py            # ad-hoc single run; images saved to ./liv
 ## Cutting a release
 
 1. Bump the version in these places (they must match — `scripts/check_version.py`
-   enforces it): `pyproject.toml`, `src/open_webui_tenki/__init__.py`
+   enforces it): `pyproject.toml`, `src/tenki_open_webui/__init__.py`
    (`__version__`), and the `version:` frontmatter for both distributables (which
    lives in `scripts/build.py`).
-2. `python scripts/build.py` and commit the regenerated files.
-3. `python scripts/check_version.py vX.Y.Z` to confirm consistency.
-4. Create a GitHub Release tagged `vX.Y.Z`. The `release` workflow verifies the
-   tag matches the declared version and attaches both distributables as release
+2. Add the matching `CHANGELOG.md` section — `## X.Y.Z — YYYY-MM-DD`, newest
+   first, changes grouped under Keep a Changelog headings (`### Added`,
+   `### Changed`, `### Security`, …). This section becomes the release notes
+   verbatim, so write it for operators. `scripts/check_changelog.py` requires the
+   declared version to have an entry: CI runs it on every pull request, and the
+   release workflow runs it as its first gate.
+3. `python scripts/build.py` and commit the regenerated files.
+4. `python scripts/check_version.py vX.Y.Z` to confirm consistency.
+5. Run the **Release** workflow with `dry_run` left on. It runs every CI gate
+   plus the version and changelog checks, and reports what it would tag and
+   publish without touching the repo — a free rehearsal.
+6. Run it again with `dry_run` off. It tags `vX.Y.Z`, creates the GitHub Release
+   with the changelog section as its notes, and attaches both distributables as
    assets. (No PyPI publish — distribution is single-file via the hub.)
+
+The workflow derives the version from `pyproject.toml`, so there's no tag to
+create by hand; it refuses to run if `vX.Y.Z` already points at another commit.
+Actions are pinned by commit SHA with the version in a trailing comment — update
+both together.
 
 ## Publishing to the Open WebUI Community site
 

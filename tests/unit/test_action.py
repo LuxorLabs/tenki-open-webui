@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from open_webui_tenki.action import Action, extract_last_code_block, find_runnable_code
+from tenki_open_webui.action import Action, extract_last_code_block, find_runnable_code
 
 
 class Emitter:

@@ -4,8 +4,8 @@ from __future__ import annotations
 
 import asyncio
 
-from open_webui_tenki.config import Valves
-from open_webui_tenki.core import CodeExecutionRequest, execute
+from tenki_open_webui.config import Valves
+from tenki_open_webui.core import CodeExecutionRequest, execute
 
 
 def _req(sdk_key="k", language="python", code="print(1)", **valve_overrides):
@@ -134,7 +134,7 @@ async def test_result_is_capped(patch_sdk):
 
 async def test_oversized_image_skipped(patch_sdk, monkeypatch):
     # A file larger than the cap must be skipped by its listed size, not read.
-    monkeypatch.setattr("open_webui_tenki.core.MAX_IMAGE_BYTES", 10)
+    monkeypatch.setattr("tenki_open_webui.core.MAX_IMAGE_BYTES", 10)
     patch_sdk(images={"big.png": b"x" * 50, "ok.png": b"\x89PNG"})
     result = await execute(_req())
     assert len(result.images) == 1  # only the small one

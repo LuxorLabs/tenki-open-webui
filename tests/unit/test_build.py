@@ -33,7 +33,7 @@ def test_no_local_package_imports(path, _class, _attr):
     for node in ast.walk(tree):
         if isinstance(node, ast.ImportFrom):
             assert node.level == 0, "relative import leaked into distributable"
-            assert not (node.module or "").startswith("open_webui_tenki")
+            assert not (node.module or "").startswith("tenki_open_webui")
 
 
 @pytest.mark.parametrize("path,_class,_attr", TARGETS)
