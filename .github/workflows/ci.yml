@@ -79,3 +79,39 @@ jobs:
           TENKI_API_KEY: ${{ secrets.TENKI_API_KEY }}
           TENKI_API_ENDPOINT: ${{ secrets.TENKI_API_ENDPOINT }}
         run: pytest tests/integration -q
+
+  ci:
+    # The single required status check for the branch ruleset. Requiring the jobs
+    # individually would couple the ruleset to the unit-tests matrix: adding a
+    # Python version yields a check nobody requires, and dropping one leaves a
+    # required check that never reports, blocking every pull request until
+    # someone edits the ruleset. Aggregating here keeps that a workflow concern.
+    #
+    # integration-tests is deliberately not a dependency: it doesn't run on pull
+    # requests, and it no-ops without TENKI_API_KEY.
+    needs: [lint, audit, unit-tests, build-sync]
+    # Without always() this job would be skipped when a gate fails — and a
+    # skipped check counts as passing, so failing CI would satisfy the ruleset.
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assert every gate succeeded
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          set -euo pipefail
+          echo "gate results: ${RESULTS}"
+
+          # An empty join means the dependency graph changed underneath us;
+          # passing on no evidence would defeat the point of this job.
+          if [ -z "${RESULTS}" ]; then
+            echo "no gate results reported" >&2
+            exit 1
+          fi
+
+          for result in ${RESULTS}; do
+            if [ "${result}" != "success" ]; then
+              echo "a required gate did not succeed" >&2
+              exit 1
+            fi
+          done
