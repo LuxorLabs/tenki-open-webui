@@ -6,7 +6,7 @@ import asyncio
 
 import pytest
 
-from open_webui_tenki.constants import OUTPUT_DIR
+from tenki_open_webui.constants import OUTPUT_DIR
 
 
 class FakeEntry:
@@ -65,7 +65,7 @@ class FakeFS:
         return self.images[path.split("/", 1)[1]]
 
     async def read_text(self, path, **kw):
-        from open_webui_tenki.constants import RESULT_FILENAME
+        from tenki_open_webui.constants import RESULT_FILENAME
 
         if path == RESULT_FILENAME and self.result_text is not None:
             return self.result_text
@@ -143,7 +143,7 @@ def patch_sdk(monkeypatch):
 
     def _apply(**cfg) -> FakeSDK:
         sdk = FakeSDK(**cfg)
-        monkeypatch.setattr("open_webui_tenki.core.AsyncSandbox", sdk)
+        monkeypatch.setattr("tenki_open_webui.core.AsyncSandbox", sdk)
         return sdk
 
     return _apply

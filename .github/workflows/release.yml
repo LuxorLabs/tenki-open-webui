@@ -1,27 +1,73 @@
 name: Release
 
+# Runs every CI gate, then tags the commit and cuts a GitHub release with both
+# single-file distributables attached as assets.
+#
+# The version is whatever `pyproject.toml` says — bump it on main first (along
+# with the other three places `scripts/check_version.py` checks), then dispatch
+# this workflow. `dry_run` (on by default) runs every gate and touches neither
+# the repo nor any release, so a rehearsal is free.
+#
+# There is no PyPI publish: these plugins are distributed as single files via the
+# Open WebUI community hub and as GitHub Release assets, not as a pip package.
+# The release itself is therefore the artifact, and creating it is the last step.
+
 on:
-  release:
-    types: [published]
   workflow_dispatch:
     inputs:
-      tag:
-        description: "Release tag to validate against (e.g. v0.1.0)"
-        required: true
+      dry_run:
+        description: Run checks without tagging or creating the release
+        type: boolean
+        default: true
 
-# No PyPI publish: these plugins are distributed as single files via the Open
-# WebUI community hub and as GitHub Release assets, not as a pip package.
+permissions:
+  contents: write # pushes the version tag and creates the release
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  release-assets:
+  release:
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          # Tags are needed to tell "already released" from "tag collision".
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.12"
-      - run: pip install -e ".[dev]"
+
+      # The version about to be released must be documented. First gate, before
+      # anything is installed: a release whose version isn't in the changelog is
+      # a release we'd have to redo.
+      - name: Check the changelog covers this version
+        run: python scripts/check_changelog.py
+
+      - name: Install dependencies
+        run: pip install -e ".[dev]"
+
+      # The same gates as CI, so a release can never ship something CI would have
+      # rejected — including build-sync, which asserts the committed single-file
+      # distributables still match the source they're generated from.
+
+      - name: Lint
+        run: ruff check src scripts tests
+
+      - name: Check formatting
+        run: ruff format --check src scripts tests
+
+      - name: Test
+        run: pytest tests/unit -q
+
+      - name: Audit dependencies for known vulnerabilities
+        run: |
+          pip install pip-audit
+          pip-audit .
 
       - name: Build distributables
         run: python scripts/build.py
@@ -29,17 +75,91 @@ jobs:
       - name: Assert committed distributables are in sync
         run: git diff --exit-code open-webui/
 
-      - name: Assert version matches the release tag
-        run: |
-          TAG="${{ github.event.release.tag_name || github.event.inputs.tag }}"
-          python scripts/check_version.py "$TAG"
+      # Notes come from the changelog rather than --generate-notes, so the release
+      # reads as something written for operators instead of a commit list. This
+      # also rejects an empty section, which check_changelog.py accepts.
+      - name: Extract release notes from the changelog
+        run: python scripts/changelog_notes.py | tee "${RUNNER_TEMP}/notes.md"
 
-      - name: Upload distributables as release assets
-        if: github.event_name == 'release'
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Resolve version
+        id: version
         run: |
-          gh release upload "${{ github.event.release.tag_name }}" \
-            open-webui/tools/tenki_code_execution.py \
-            open-webui/functions/tenki_run_code.py \
-            --clobber
+          set -euo pipefail
+          VERSION="$(python -c 'import re,pathlib; print(re.search(r"^version\s*=\s*\"([^\"]+)\"", pathlib.Path("pyproject.toml").read_text(), re.M).group(1))')"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "tag=v${VERSION}" >> "$GITHUB_OUTPUT"
+
+      - name: Assert every declared version agrees with the tag
+        run: python scripts/check_version.py "${{ steps.version.outputs.tag }}"
+
+      # Fail before tagging rather than after: a tag on some other commit means
+      # the version was not bumped.
+      - name: Check the version tag is free
+        env:
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            if [ "$(git rev-list -n1 "${TAG}")" != "${GITHUB_SHA}" ]; then
+              echo "${TAG} already exists and points at a different commit — bump the version" >&2
+              exit 1
+            fi
+            echo "${TAG} already points at this commit"
+          fi
+
+      - name: Tag the release
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          if [ "${DRY_RUN}" = "true" ]; then
+            echo "dry run: would tag ${GITHUB_SHA} as ${TAG}"
+            exit 0
+          fi
+
+          if git rev-parse -q --verify "refs/tags/${TAG}" >/dev/null; then
+            echo "${TAG} already exists, leaving it alone"
+            exit 0
+          fi
+
+          git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              tag -a "${TAG}" -m "${TAG}"
+          git push origin "${TAG}"
+
+      # Creating the release comes last, so a failed gate leaves no tag and no
+      # release behind. The reverse gap — tagged but no release — is recoverable:
+      # this step is idempotent, so re-running the workflow finishes the job.
+      - name: Create the GitHub release
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.version.outputs.tag }}
+        run: |
+          set -euo pipefail
+
+          ASSETS=(
+            open-webui/tools/tenki_code_execution.py
+            open-webui/functions/tenki_run_code.py
+          )
+
+          if [ "${DRY_RUN}" = "true" ]; then
+            echo "dry run: would create release ${TAG} with assets: ${ASSETS[*]}"
+            exit 0
+          fi
+
+          # Assets are refreshed but existing notes are left alone, in case they
+          # were edited by hand after the release was cut.
+          if gh release view "${TAG}" >/dev/null 2>&1; then
+            echo "release ${TAG} already exists, refreshing its assets"
+            gh release upload "${TAG}" "${ASSETS[@]}" --clobber
+            exit 0
+          fi
+
+          gh release create "${TAG}" \
+            --title "${TAG}" \
+            --notes-file "${RUNNER_TEMP}/notes.md" \
+            --verify-tag \
+            "${ASSETS[@]}"

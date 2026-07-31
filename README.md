@@ -1,4 +1,4 @@
-# Open WebUI Tenki — Code Execution in Isolated microVM Sandboxes
+# Tenki for Open WebUI — Code Execution in Isolated microVM Sandboxes
 
 Run **Python and shell code** from [Open WebUI](https://openwebui.com) inside
 **isolated, ephemeral [Tenki](https://tenki.cloud) microVM sandboxes** — a secure
@@ -138,8 +138,8 @@ For a system package on an image with `apt`, the equivalent is
 ## Develop & test
 
 ```bash
-git clone https://github.com/LuxorLabs/open-webui-tenki
-cd open-webui-tenki
+git clone https://github.com/LuxorLabs/tenki-open-webui
+cd tenki-open-webui
 python -m venv .venv && source .venv/bin/activate
 pip install -e ".[dev]"
 
@@ -156,12 +156,17 @@ python scripts/build.py
 
 ### Architecture
 
-The logic lives once in `src/open_webui_tenki/` (`config.py`, `result.py`,
+The logic lives once in `src/tenki_open_webui/` (`config.py`, `result.py`,
 `languages.py`, `core.py`, plus the `tool.py` entry point). `scripts/build.py`
 **inlines** that core into each single-file distributable under `open-webui/`,
 so hub users can one-click import a self-contained file. Edit `src/`, then run
 `python scripts/build.py` — CI verifies the committed distributables match the
 source.
+
+## Changelog
+
+See [CHANGELOG.md](./CHANGELOG.md). Tagged versions are published as GitHub
+Releases with both single-file distributables attached as assets.
 
 ## License
 

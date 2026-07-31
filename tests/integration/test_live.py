@@ -16,8 +16,8 @@ import os
 
 import pytest
 
-from open_webui_tenki.config import Valves
-from open_webui_tenki.core import CodeExecutionRequest, execute
+from tenki_open_webui.config import Valves
+from tenki_open_webui.core import CodeExecutionRequest, execute
 
 API_KEY = os.getenv("TENKI_API_KEY", "")
 
@@ -118,7 +118,7 @@ async def test_matplotlib_autocapture_if_available():
 
 async def test_action_path_end_to_end():
     # Exercise the user-invoked Action against a real sandbox (parity with the Tool).
-    from open_webui_tenki.action import Action
+    from tenki_open_webui.action import Action
 
     events: list[dict] = []
 

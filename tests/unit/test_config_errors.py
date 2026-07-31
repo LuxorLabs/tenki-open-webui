@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from open_webui_tenki.config import Valves, resolve_effective_key
-from open_webui_tenki.tool import Tools
+from tenki_open_webui.config import Valves, resolve_effective_key
+from tenki_open_webui.tool import Tools
 
 
 def test_credential_precedence_user_wins():

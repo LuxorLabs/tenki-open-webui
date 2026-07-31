@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from open_webui_tenki.tool import Tools
+from tenki_open_webui.tool import Tools
 
 
 class Emitter:
