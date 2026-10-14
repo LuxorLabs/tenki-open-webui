@@ -9,6 +9,14 @@ Versions track the `version:` frontmatter of both single-file distributables;
 `scripts/check_version.py` keeps those in step with `pyproject.toml`, and
 `scripts/check_changelog.py` requires the declared version to appear below.
 
+## 0.1.1 — 2026-10-14
+
+### Changed
+
+- Both plugins now require `tenki[async]>=1.4.1` (was `>=0.5.1`), with no upper
+  bound. Open WebUI upgrades an older `tenki` on the host the next time it loads
+  either plugin, and later SDK releases need no plugin update.
+
 ## 0.1.0 — 2026-07-31
 
 First release. Ships two self-contained Open WebUI plugins that run Python and

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tenki-open-webui"
-version = "0.1.0"
+version = "0.1.1"
 description = "Run Python and shell code in isolated, ephemeral Tenki microVM sandboxes from Open WebUI — a secure code interpreter / code execution sandbox (Tool + Action)."
 readme = "README.md"
 license = { text = "MIT" }
@@ -23,7 +23,7 @@ keywords = [
     "tenki",
 ]
 dependencies = [
-    "tenki[async]>=0.5.1",
+    "tenki[async]>=1.4.1",
     "pydantic>=2",
 ]
 
