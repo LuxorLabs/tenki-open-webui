@@ -45,7 +45,7 @@ def _req(code: str, language: str = "python", **overrides) -> CodeExecutionReque
 
 async def _raw_sandbox():
     """Provision a raw AsyncSandbox with the same knobs the core uses."""
-    from tenki import AsyncSandbox
+    from luxor_ai import AsyncSandbox
 
     v = _valves()
     return await AsyncSandbox.create(
@@ -167,7 +167,7 @@ async def test_fs_mkdir_recursive_is_writable_by_exec_user():
 
 async def test_no_sandbox_leak():
     # Snapshot RUNNING sessions before/after; the run's sandbox must be torn down.
-    from tenki import AsyncClient
+    from luxor_ai import AsyncClient
 
     endpoint = os.getenv("TENKI_API_ENDPOINT", "https://api.tenki.cloud")
 

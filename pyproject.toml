@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tenki-open-webui"
-version = "0.1.1"
+version = "0.2.0"
 description = "Run Python and shell code in isolated, ephemeral Tenki microVM sandboxes from Open WebUI — a secure code interpreter / code execution sandbox (Tool + Action)."
 readme = "README.md"
 license = { text = "MIT" }
@@ -20,9 +20,10 @@ keywords = [
     "python",
     "microvm",
     "tenki",
+    "luxor-ai",
 ]
 dependencies = [
-    "tenki[async]>=1.4.3",
+    "luxor-ai[async]>=1.4.4",
     "pydantic>=2",
 ]
 

@@ -83,7 +83,7 @@ docker run -d -p 3000:8080 \
 
 Open <http://localhost:3000> and create the first (admin) account.
 
-> Open WebUI installs the plugin's declared `tenki[async]` dependency
+> Open WebUI installs the plugin's declared `luxor-ai[async]` dependency
 > automatically on import (from the `requirements:` frontmatter) — no manual
 > install, no restart.
 

@@ -9,6 +9,16 @@ Versions track the `version:` frontmatter of both single-file distributables;
 `scripts/check_version.py` keeps those in step with `pyproject.toml`, and
 `scripts/check_changelog.py` requires the declared version to appear below.
 
+## 0.2.0 — 2026-11-10
+
+### Changed
+
+- Both plugins now depend on `luxor-ai[async]>=1.4.4`, the new name of the
+  Tenki Python SDK, instead of `tenki[async]`. Open WebUI installs it the next
+  time it loads either plugin; nothing else changes for operators.
+- If `tenki` is already installed on the host, leave it installed: both packages
+  ship the same modules, and uninstalling `tenki` breaks `luxor-ai`.
+
 ## 0.1.1 — 2026-11-10
 
 ### Changed

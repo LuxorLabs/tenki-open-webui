@@ -27,9 +27,9 @@ author: LuxorLabs
 author_url: https://github.com/LuxorLabs/tenki-open-webui
 funding_url: https://github.com/LuxorLabs/tenki-open-webui
 description: Run Python and shell code in isolated, ephemeral Tenki microVM sandboxes. A secure code interpreter / code execution sandbox for Open WebUI (isolated, ephemeral, microVM).
-version: 0.1.1
+version: 0.2.0
 license: MIT
-requirements: tenki[async]>=1.4.3
+requirements: luxor-ai[async]>=1.4.4
 """'''
 
 ACTION_FRONTMATTER = '''\
@@ -39,9 +39,9 @@ author: LuxorLabs
 author_url: https://github.com/LuxorLabs/tenki-open-webui
 funding_url: https://github.com/LuxorLabs/tenki-open-webui
 description: A "Run code" button that executes a message's Python or shell code block in an isolated, ephemeral Tenki microVM sandbox — a secure code interpreter / code execution sandbox for Open WebUI.
-version: 0.1.1
+version: 0.2.0
 license: MIT
-requirements: tenki[async]>=1.4.3
+requirements: luxor-ai[async]>=1.4.4
 """'''
 
 # (entry_module, frontmatter, output_path)

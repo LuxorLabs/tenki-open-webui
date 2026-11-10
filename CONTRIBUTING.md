@@ -92,7 +92,7 @@ publishing.
   trust. (Ours: secrets only in Valves, never logged; fully `async` handlers;
   documented security posture — all in line with Open WebUI's sharing guidance.)
 - **`requirements:` installs at load time.** Open WebUI pip-installs
-  `tenki[async]` on import. This requires that version to be published on
+  `luxor-ai[async]` on import. This requires that version to be published on
   PyPI. Note for operators: in multi-replica deployments, runtime installs can
   race across workers — they can set
   `ENABLE_PIP_INSTALL_FRONTMATTER_REQUIREMENTS=False` and bake the dependency into

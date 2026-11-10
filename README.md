@@ -45,7 +45,7 @@ between runs**, is **non-blocking** (async), enforces a **timeout**, and is
      `open-webui/tools/tenki_code_execution.py`.
    - **Action** (optional) — Admin Panel → Functions → import _Tenki Run Code_,
      or paste the contents of `open-webui/functions/tenki_run_code.py`.
-   - Open WebUI installs the declared `tenki[async]` dependency
+   - Open WebUI installs the declared `luxor-ai[async]` dependency
      automatically on import — no manual `pip install`, no server restart.
      _(Multi-replica deployments may prefer to bake the dependency into their
      image and set `ENABLE_PIP_INSTALL_FRONTMATTER_REQUIREMENTS=False` to avoid
@@ -105,7 +105,7 @@ crashes or silently does nothing.
 Everything your code runs against — the Python version, the shell, and the
 available libraries — comes from the **Tenki sandbox image**, not from this
 plugin. The `requirements:` frontmatter only installs the plugin's own dependency
-(`tenki[async]`) on the Open WebUI host; it does **not** add packages to
+(`luxor-ai[async]`) on the Open WebUI host; it does **not** add packages to
 the sandbox.
 
 The default image ships a common set of libraries. To use a different set, point
