@@ -76,6 +76,8 @@ jobs:
       - run: pip install -e ".[dev]"
       - name: Run live integration tests (skips if no key)
         env:
+          LUXORAI_API_KEY: ${{ secrets.LUXORAI_API_KEY }}
+          LUXORAI_API_ENDPOINT: ${{ secrets.LUXORAI_API_ENDPOINT }}
           TENKI_API_KEY: ${{ secrets.TENKI_API_KEY }}
           TENKI_API_ENDPOINT: ${{ secrets.TENKI_API_ENDPOINT }}
         run: pytest tests/integration -q

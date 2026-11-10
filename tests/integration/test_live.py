@@ -5,8 +5,9 @@ stays green without credentials. These hit the real async SDK and provision real
 microVMs (they cost quota and take seconds each).
 
 Env:
-- ``TENKI_API_KEY``       (required to run)
-- ``TENKI_API_ENDPOINT``  (optional; defaults to https://api.tenki.cloud)
+- ``LUXORAI_API_KEY`` or ``TENKI_API_KEY``            (required to run)
+- ``LUXORAI_API_ENDPOINT`` or ``TENKI_API_ENDPOINT``  (optional; defaults to
+  https://api.tenki.cloud)
 """
 
 from __future__ import annotations
@@ -19,7 +20,13 @@ import pytest
 from tenki_open_webui.config import Valves
 from tenki_open_webui.core import CodeExecutionRequest, execute
 
-API_KEY = os.getenv("TENKI_API_KEY", "")
+# LUXORAI_* is read before TENKI_*, matching the tenki SDK.
+API_KEY = os.getenv("LUXORAI_API_KEY") or os.getenv("TENKI_API_KEY", "")
+ENDPOINT = (
+    os.getenv("LUXORAI_API_ENDPOINT")
+    or os.getenv("TENKI_API_ENDPOINT")
+    or "https://api.tenki.cloud"
+)
 
 pytestmark = pytest.mark.skipif(not API_KEY, reason="TENKI_API_KEY not set")
 
@@ -32,7 +39,7 @@ _ONE_PX_PNG = base64.b64decode(
 def _valves(**overrides) -> Valves:
     return Valves(
         tenki_api_key=API_KEY,
-        tenki_api_endpoint=os.getenv("TENKI_API_ENDPOINT", "https://api.tenki.cloud"),
+        tenki_api_endpoint=ENDPOINT,
         **overrides,
     )
 
@@ -169,10 +176,8 @@ async def test_no_sandbox_leak():
     # Snapshot RUNNING sessions before/after; the run's sandbox must be torn down.
     from tenki import AsyncClient
 
-    endpoint = os.getenv("TENKI_API_ENDPOINT", "https://api.tenki.cloud")
-
     async def running_ids() -> set[str]:
-        async with AsyncClient(auth_token=API_KEY, base_url=endpoint) as client:
+        async with AsyncClient(auth_token=API_KEY, base_url=ENDPOINT) as client:
             return {sb.id for sb in await client.list() if sb.state == "RUNNING"}
 
     before = await running_ids()

@@ -36,6 +36,14 @@ print("sum 1..5 =", sum(range(1, 6)))
 """
 
 
+# LUXORAI_* is read before TENKI_*, matching the tenki SDK.
+ENDPOINT = (
+    os.getenv("LUXORAI_API_ENDPOINT")
+    or os.getenv("TENKI_API_ENDPOINT")
+    or "https://api.tenki.cloud"
+)
+
+
 async def main() -> int:
     parser = argparse.ArgumentParser(description="Run a snippet in a live Tenki sandbox.")
     parser.add_argument("-l", "--language", default="python", choices=["python", "shell"])
@@ -45,7 +53,7 @@ async def main() -> int:
     parser.add_argument("--egress", action="store_true", help="Enable sandbox network egress.")
     args = parser.parse_args()
 
-    key = os.getenv("TENKI_API_KEY", "")
+    key = os.getenv("LUXORAI_API_KEY") or os.getenv("TENKI_API_KEY", "")
     if not key:
         print("ERROR: set TENKI_API_KEY", file=sys.stderr)
         return 2
@@ -59,7 +67,7 @@ async def main() -> int:
 
     valves = Valves(
         tenki_api_key=key,
-        tenki_api_endpoint=os.getenv("TENKI_API_ENDPOINT", "https://api.tenki.cloud"),
+        tenki_api_endpoint=ENDPOINT,
         timeout_seconds=args.timeout,
         network_egress=args.egress,
     )
