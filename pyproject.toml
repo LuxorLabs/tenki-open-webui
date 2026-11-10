@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "tenki-open-webui"
-version = "0.1.0"
+version = "0.1.1"
 description = "Run Python and shell code in isolated, ephemeral Tenki microVM sandboxes from Open WebUI — a secure code interpreter / code execution sandbox (Tool + Action)."
 readme = "README.md"
 license = { text = "MIT" }
@@ -19,19 +19,18 @@ keywords = [
     "sandbox",
     "python",
     "microvm",
-    "firecracker",
     "tenki",
 ]
 dependencies = [
-    "tenki[async]>=0.5.1",
+    "tenki[async]>=1.4.3",
     "pydantic>=2",
 ]
 
 [project.optional-dependencies]
 dev = [
-    "pytest>=8",
-    "pytest-asyncio>=0.23",
-    "ruff>=0.6",
+    "pytest>=9.2",
+    "pytest-asyncio>=1.4",
+    "ruff>=0.17",
 ]
 
 [project.urls]
@@ -43,6 +42,7 @@ packages = ["src/tenki_open_webui"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
 testpaths = ["tests"]
 
 [tool.ruff]

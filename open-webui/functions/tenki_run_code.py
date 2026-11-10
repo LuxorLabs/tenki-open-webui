@@ -4,9 +4,9 @@ author: LuxorLabs
 author_url: https://github.com/LuxorLabs/tenki-open-webui
 funding_url: https://github.com/LuxorLabs/tenki-open-webui
 description: A "Run code" button that executes a message's Python or shell code block in an isolated, ephemeral Tenki microVM sandbox — a secure code interpreter / code execution sandbox for Open WebUI.
-version: 0.1.0
+version: 0.1.1
 license: MIT
-requirements: tenki[async]>=0.5.1
+requirements: tenki[async]>=1.4.3
 """
 
 # ---------------------------------------------------------------------------

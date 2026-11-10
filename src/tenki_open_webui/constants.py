@@ -1,7 +1,7 @@
 """Shared constants for the Tenki code-execution plugin.
 
 Filesystem paths are **relative to the sandbox workdir** (the Tenki SDK restricts
-``sb.fs`` reads/writes to the workdir, e.g. ``/home/tenki``), so a bare
+``sb.fs`` reads/writes to the workdir, e.g. ``/home/sandbox``), so a bare
 directory name resolves inside the workdir regardless of the sandbox image.
 """
 
