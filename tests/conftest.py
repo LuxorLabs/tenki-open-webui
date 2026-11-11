@@ -99,7 +99,7 @@ class FakeSandbox:
 
 
 class FakeSDK:
-    """Stand-in for tenki.AsyncSandbox; patched into core."""
+    """Stand-in for luxor_ai.AsyncSandbox; patched into core."""
 
     def __init__(
         self,

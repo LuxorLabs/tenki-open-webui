@@ -13,7 +13,7 @@ import time
 from dataclasses import dataclass
 from os.path import splitext
 
-from tenki import AsyncSandbox
+from luxor_ai import AsyncSandbox
 
 from .config import Valves
 from .constants import (
