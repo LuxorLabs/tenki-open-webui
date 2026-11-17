@@ -5,8 +5,8 @@ Exercises the same shared core the plugins use — a quick, eyeball-able live ch
 without needing Open WebUI. Any collected images are written to ``./live_out/``.
 
 Usage:
-    export TENKI_API_KEY=sk-...
-    # optional: export TENKI_API_ENDPOINT=https://api.tenki.cloud
+    export LUXOR_API_KEY=lx_...   # or the legacy TENKI_API_KEY
+    # optional: export LUXOR_API_ENDPOINT=https://api.tenki.cloud
 
     python scripts/try_live.py                          # default demo snippet
     python scripts/try_live.py -l shell -c 'uname -a'
@@ -19,13 +19,13 @@ from __future__ import annotations
 import argparse
 import asyncio
 import base64
-import os
 import sys
 from pathlib import Path
 
 # Allow running from a checkout without installing the package.
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent / "src"))
 
+import live_env  # noqa: E402
 from tenki_open_webui.config import Valves  # noqa: E402
 from tenki_open_webui.core import CodeExecutionRequest, execute  # noqa: E402
 
@@ -34,14 +34,6 @@ import sys
 print("python:", sys.version.split()[0])
 print("sum 1..5 =", sum(range(1, 6)))
 """
-
-
-# LUXORAI_* is read before TENKI_*, matching the tenki SDK.
-ENDPOINT = (
-    os.getenv("LUXORAI_API_ENDPOINT")
-    or os.getenv("TENKI_API_ENDPOINT")
-    or "https://api.tenki.cloud"
-)
 
 
 async def main() -> int:
@@ -53,9 +45,9 @@ async def main() -> int:
     parser.add_argument("--egress", action="store_true", help="Enable sandbox network egress.")
     args = parser.parse_args()
 
-    key = os.getenv("LUXORAI_API_KEY") or os.getenv("TENKI_API_KEY", "")
+    key = live_env.api_key()
     if not key:
-        print("ERROR: set TENKI_API_KEY", file=sys.stderr)
+        print("ERROR: set LUXOR_API_KEY", file=sys.stderr)
         return 2
 
     if args.file:
@@ -67,7 +59,7 @@ async def main() -> int:
 
     valves = Valves(
         tenki_api_key=key,
-        tenki_api_endpoint=ENDPOINT,
+        tenki_api_endpoint=live_env.endpoint(),
         timeout_seconds=args.timeout,
         network_egress=args.egress,
     )

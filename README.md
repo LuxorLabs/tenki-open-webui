@@ -147,7 +147,7 @@ pip install -e ".[dev]"
 pytest tests/unit
 
 # Integration tests (live; needs a real key)
-export TENKI_API_KEY=sk-...
+export LUXOR_API_KEY=lx_...   # or the legacy TENKI_API_KEY
 pytest tests/integration
 
 # Rebuild the self-contained distributable(s)

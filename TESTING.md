@@ -5,8 +5,8 @@ This plugin is validated at three layers, from fastest/cheapest to most realisti
 | Layer | What it proves | Credentials |
 | --- | --- | --- |
 | **Unit** (`tests/unit`) | Logic, config, rendering, build integrity — against a mocked SDK | none |
-| **Live integration** (`tests/integration`) | The real path: provisioning, exec, output capture, image collection, timeout, teardown — against real microVMs | `TENKI_API_KEY` |
-| **Full Open WebUI** (Docker) | The end-user experience: import, configure, and run from the UI | `TENKI_API_KEY` + an LLM (for the Tool) |
+| **Live integration** (`tests/integration`) | The real path: provisioning, exec, output capture, image collection, timeout, teardown, against real microVMs | `LUXOR_API_KEY` |
+| **Full Open WebUI** (Docker) | The end-user experience: import, configure, and run from the UI | `LUXOR_API_KEY` + an LLM (for the Tool) |
 
 ## 1. Unit tests (no credentials)
 
@@ -27,18 +27,21 @@ distributables are self-contained.
 ## 2. Live integration tests (real sandboxes)
 
 These provision real microVMs, so they cost quota and take a few seconds each.
-They are **skipped automatically** when `TENKI_API_KEY` is unset, so CI stays
+They are **skipped automatically** when `LUXOR_API_KEY` is unset, so CI stays
 green without secrets.
 
 ```bash
-export TENKI_API_KEY=sk-...
+export LUXOR_API_KEY=lx_...
 # optional, for a self-hosted or non-default deployment:
-# export TENKI_API_ENDPOINT=https://api.tenki.cloud
+# export LUXOR_API_ENDPOINT=https://api.tenki.cloud
 
 pytest tests/integration -v          # full gated suite
 python scripts/try_live.py           # ad-hoc single run; images saved to ./live_out/
 python scripts/try_live.py -l shell -c 'uname -a'
 ```
+
+The legacy `TENKI_API_KEY` and `TENKI_API_ENDPOINT` are read as fallbacks.
+`LUXOR_API_KEY` is only used when it starts with `lx_` or `tk_`; any other value is ignored.
 
 What the live suite validates end-to-end:
 
@@ -55,7 +58,7 @@ What the live suite validates end-to-end:
   snapshotting running sessions before/after).
 
 > **Self-hosted / private-CA note.** The gRPC client uses its own trust store and
-> DNS resolver. If you point `TENKI_API_ENDPOINT` at an instance served with a
+> DNS resolver. If you point `LUXOR_API_ENDPOINT` at an instance served with a
 > private/internal CA, set `GRPC_DEFAULT_SSL_ROOTS_FILE_PATH` to your CA bundle.
 > If the API hostname resolves only via a non-standard system resolver, set
 > `GRPC_DNS_RESOLVER=native`. Neither is needed for the default public endpoint.

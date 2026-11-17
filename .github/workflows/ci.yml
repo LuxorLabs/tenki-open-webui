@@ -76,8 +76,8 @@ jobs:
       - run: pip install -e ".[dev]"
       - name: Run live integration tests (skips if no key)
         env:
-          LUXORAI_API_KEY: ${{ secrets.LUXORAI_API_KEY }}
-          LUXORAI_API_ENDPOINT: ${{ secrets.LUXORAI_API_ENDPOINT }}
+          LUXOR_API_KEY: ${{ secrets.LUXORAI_API_KEY }}
+          LUXOR_API_ENDPOINT: ${{ secrets.LUXORAI_API_ENDPOINT }}
           TENKI_API_KEY: ${{ secrets.TENKI_API_KEY }}
           TENKI_API_ENDPOINT: ${{ secrets.TENKI_API_ENDPOINT }}
         run: pytest tests/integration -q
@@ -90,7 +90,7 @@ jobs:
     # someone edits the ruleset. Aggregating here keeps that a workflow concern.
     #
     # integration-tests is deliberately not a dependency: it doesn't run on pull
-    # requests, and it no-ops without TENKI_API_KEY.
+    # requests, and it no-ops without LUXOR_API_KEY.
     needs: [lint, audit, unit-tests, build-sync]
     # Without always() this job would be skipped when a gate fails — and a
     # skipped check counts as passing, so failing CI would satisfy the ruleset.
