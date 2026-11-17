@@ -5,7 +5,7 @@ This plugin is validated at three layers, from fastest/cheapest to most realisti
 | Layer | What it proves | Credentials |
 | --- | --- | --- |
 | **Unit** (`tests/unit`) | Logic, config, rendering, build integrity — against a mocked SDK | none |
-| **Live integration** (`tests/integration`) | The real path: provisioning, exec, output capture, image collection, timeout, teardown — against real microVMs | `LUXOR_API_KEY` |
+| **Live integration** (`tests/integration`) | The real path: provisioning, exec, output capture, image collection, timeout, teardown, against real microVMs | `LUXOR_API_KEY` |
 | **Full Open WebUI** (Docker) | The end-user experience: import, configure, and run from the UI | `LUXOR_API_KEY` + an LLM (for the Tool) |
 
 ## 1. Unit tests (no credentials)

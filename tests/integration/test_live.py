@@ -1,6 +1,6 @@
 """Live integration tests against a real Tenki API.
 
-Gated on ``LUXOR_API_KEY`` — skipped entirely when it is unset, so ``pytest``
+Gated on ``LUXOR_API_KEY``: skipped entirely when it is unset, so ``pytest``
 stays green without credentials. These hit the real async SDK and provision real
 microVMs (they cost quota and take seconds each).
 
