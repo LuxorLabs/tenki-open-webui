@@ -1,34 +1,30 @@
 """Live integration tests against a real Tenki API.
 
-Gated on ``TENKI_API_KEY`` — skipped entirely when it is unset, so ``pytest``
+Gated on ``LUXOR_API_KEY`` — skipped entirely when it is unset, so ``pytest``
 stays green without credentials. These hit the real async SDK and provision real
 microVMs (they cost quota and take seconds each).
 
 Env:
-- ``LUXORAI_API_KEY`` or ``TENKI_API_KEY``            (required to run)
-- ``LUXORAI_API_ENDPOINT`` or ``TENKI_API_ENDPOINT``  (optional; defaults to
+- ``LUXOR_API_KEY`` or ``TENKI_API_KEY``            (required to run;
+  ``LUXOR_API_KEY`` is only used when it starts with ``lx_`` or ``tk_``)
+- ``LUXOR_API_ENDPOINT`` or ``TENKI_API_ENDPOINT``  (optional; defaults to
   https://api.tenki.cloud)
 """
 
 from __future__ import annotations
 
 import base64
-import os
 
 import pytest
 
+import live_env
 from tenki_open_webui.config import Valves
 from tenki_open_webui.core import CodeExecutionRequest, execute
 
-# LUXORAI_* is read before TENKI_*, matching the tenki SDK.
-API_KEY = os.getenv("LUXORAI_API_KEY") or os.getenv("TENKI_API_KEY", "")
-ENDPOINT = (
-    os.getenv("LUXORAI_API_ENDPOINT")
-    or os.getenv("TENKI_API_ENDPOINT")
-    or "https://api.tenki.cloud"
-)
+API_KEY = live_env.api_key()
+ENDPOINT = live_env.endpoint()
 
-pytestmark = pytest.mark.skipif(not API_KEY, reason="TENKI_API_KEY not set")
+pytestmark = pytest.mark.skipif(not API_KEY, reason="LUXOR_API_KEY not set")
 
 # A valid 1x1 PNG — lets us test image collection without depending on matplotlib.
 _ONE_PX_PNG = base64.b64decode(

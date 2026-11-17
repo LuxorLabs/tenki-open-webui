@@ -26,11 +26,14 @@ if they drift (`git diff --exit-code open-webui/`).
 ### Live integration tests
 
 ```bash
-export TENKI_API_KEY=sk-...
-# optional: export TENKI_API_ENDPOINT=https://api.tenki.cloud
+export LUXOR_API_KEY=lx_...
+# optional: export LUXOR_API_ENDPOINT=https://api.tenki.cloud
 pytest tests/integration              # provisions real microVMs; costs quota
 python scripts/try_live.py            # ad-hoc single run; images saved to ./live_out/
 ```
+
+The legacy `TENKI_API_KEY` and `TENKI_API_ENDPOINT` are read as fallbacks.
+`LUXOR_API_KEY` is only used when it starts with `lx_` or `tk_`; any other value is ignored.
 
 ## Cutting a release
 

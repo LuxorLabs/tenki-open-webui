@@ -9,6 +9,17 @@ Versions track the `version:` frontmatter of both single-file distributables;
 `scripts/check_version.py` keeps those in step with `pyproject.toml`, and
 `scripts/check_changelog.py` requires the declared version to appear below.
 
+## Unreleased
+
+### Changed
+
+- Development tooling only (`scripts/try_live.py` and the live integration
+  tests); the plugins are unchanged and take their key from the Valves.
+  Environment variables now use the `LUXOR_` prefix (for example
+  `LUXOR_API_KEY`). `LUXORAI_*` variables are no longer read; `TENKI_*` still
+  works as a fallback. `LUXOR_API_KEY` is only used when it starts with `lx_` or
+  `tk_`.
+
 ## 0.1.1 — 2026-11-10
 
 ### Changed
